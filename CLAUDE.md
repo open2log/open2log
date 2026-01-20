@@ -9,3 +9,5 @@ Read @GOAL.md and implement it.
 * Use SOPS to encrypt secrets
 * Use Swift for iOS app and use native integrations
 * Use Kotlin for Android app
+* Use monorepo inside this git repository. create DuckDB extensions and OpenTofu plugins outside of this repository.
+* If certain credential for Cloudflare or Hetzner is not available you can ask for them from the user.
