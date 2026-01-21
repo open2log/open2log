@@ -24,3 +24,9 @@ sops -r -i --add-age ${NEW-PUBLIC-AGE-KEY-HERE} secrets/infra.yaml
 ```sh
 sops edit secrets/infra.yaml
 ```
+
+### Limiting IP-access to the keys
+Let's assume that the keys might accidentally leak even though they are encrypted in SOPS. You can limit using them into only certain IP-addresses here with Hetzner:
+
+https://robot.hetzner.com/preferences/index
+
