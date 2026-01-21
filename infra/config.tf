@@ -28,6 +28,7 @@ terraform {
   }
 
   # Added following https://developers.cloudflare.com/terraform/advanced-topics/remote-backend/
+  # Access key, secret key and the s3 url override come from secrets/infra.yaml
   backend "s3" {
     bucket = "infra-state"
     key    = "open2log/terraform.tfstate"
