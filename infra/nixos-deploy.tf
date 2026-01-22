@@ -4,8 +4,8 @@
 module "nixos_deploy" {
   source = "github.com/nix-community/nixos-anywhere//terraform/all-in-one"
 
-  nixos_system_attr      = ".#nixosConfigurations.memento-mori.config.system.build.toplevel"
-  nixos_partitioner_attr = ".#nixosConfigurations.memento-mori.config.system.build.diskoScript"
+  nixos_system_attr      = "${path.module}/../server/configuration#nixosConfigurations.memento-mori.config.system.build.toplevel"
+  nixos_partitioner_attr = "${path.module}/../server/configuration#nixosConfigurations.memento-mori.config.system.build.diskoScript"
 
   target_host = hrobot_server.main.public_net.ipv4
   instance_id = hrobot_server.main.server_id

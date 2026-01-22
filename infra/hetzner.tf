@@ -76,5 +76,5 @@ output "storagebox_server" {
 
 output "storagebox_webdav_url" {
   description = "WebDAV URL for the storage box"
-  value       = "https://${hcloud_storage_box.open2log.server}.your-storagebox.de"
+  value       = "https://${hcloud_storage_box.open2log.server}"
 }
