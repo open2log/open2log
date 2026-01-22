@@ -78,4 +78,13 @@ defmodule Open2log.Accounts do
     |> order_by([u], asc: u.inserted_at)
     |> Repo.all()
   end
+
+  @doc """
+  Updates a user's profile.
+  """
+  def update_user(%User{} = user, attrs) do
+    user
+    |> User.profile_changeset(attrs)
+    |> Repo.update()
+  end
 end

@@ -91,6 +91,18 @@ defmodule Open2log.Products do
   # Product Matching
 
   @doc """
+  Creates or updates a product match vote.
+  """
+  def create_or_update_match(attrs) do
+    vote_match(
+      attrs.physical_product_id,
+      attrs.online_product_id,
+      attrs.user_id,
+      attrs.vote
+    )
+  end
+
+  @doc """
   Records a user's vote on whether two products match.
   """
   def vote_match(physical_product_id, online_product_id, user_id, vote) do

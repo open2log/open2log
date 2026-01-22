@@ -46,4 +46,14 @@ defmodule Open2log.Accounts.User do
   def verify_password(%__MODULE__{password_hash: hash}, password) do
     Bcrypt.verify_pass(password, hash)
   end
+
+  def profile_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:email])
+    |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/)
+    |> unique_constraint(:email)
+  end
+
+  def membership_status(%__MODULE__{member_since: nil}), do: :none
+  def membership_status(%__MODULE__{member_since: _}), do: :active
 end

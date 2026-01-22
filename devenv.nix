@@ -64,7 +64,14 @@ rec {
   # $ infra plan
   # $ infra apply
   scripts.infra.exec = ''
-    sops exec-env ${config.git.root}/secrets/infra.yaml "tofu -chdir=${config.git.root}/infra $@"
+    case "$1" in
+      validate)
+        tofu -chdir=${config.git.root}/infra $@
+        ;;
+      *)
+        sops exec-env ${config.git.root}/secrets/infra.yaml "tofu -chdir=${config.git.root}/infra $@"
+        ;;
+    esac
   '';
 
   # useful in scripting
