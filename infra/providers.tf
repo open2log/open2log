@@ -20,12 +20,12 @@ terraform {
 }
 
 provider "cloudflare" {
-  api_token = var.cloudflare_api_token
+  # Token comes from CLOUDFLARE_API_TOKEN env var via sops
+  #  api_token = var.cloudflare_api_token
 }
 
 provider "hrobot" {
-  username = var.hrobot_username
-  password = var.hrobot_password
+  # Credentials come from $HROBOT_USERNAME and $HROBOT_PASSWORD
 }
 
 provider "hcloud" {

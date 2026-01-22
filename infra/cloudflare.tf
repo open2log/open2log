@@ -70,75 +70,27 @@ resource "cloudflare_record" "opentolog_root" {
   ttl     = 1
 }
 
-resource "cloudflare_ruleset" "opentolog_redirect" {
-  zone_id = data.cloudflare_zone.opentolog.id
-  name    = "Redirect to open2log.com"
-  kind    = "zone"
-  phase   = "http_request_dynamic_redirect"
+# TODO: Configure opentolog.com redirect manually in Cloudflare dashboard
+# Page rules don't work with account-owned API tokens
 
-  rules {
-    action = "redirect"
-    action_parameters {
-      from_value {
-        status_code = 301
-        target_url {
-          expression = "concat(\"https://open2log.com\", http.request.uri.path)"
-        }
-        preserve_query_string = true
-      }
-    }
-    expression  = "true"
-    description = "Redirect all traffic to open2log.com"
-    enabled     = true
-  }
-}
-
-# Rate limiting for API endpoints
+# Rate limiting for API endpoints (free plan: 1 rule, 10s period only)
 resource "cloudflare_ruleset" "rate_limiting" {
   zone_id = data.cloudflare_zone.open2log.id
   name    = "API Rate Limiting"
   kind    = "zone"
   phase   = "http_ratelimit"
 
-  # Price submission rate limit - 10 per minute per IP
+  # General API rate limit - 10 per 10 seconds per IP per colo
   rules {
     action = "block"
     ratelimit {
-      characteristics     = ["ip.src"]
-      period              = 60
+      characteristics     = ["cf.colo.id", "ip.src"]
+      period              = 10
       requests_per_period = 10
-      mitigation_timeout  = 600
+      mitigation_timeout  = 10
     }
-    expression  = "(http.request.uri.path matches \"^/api/v1/prices$\" and http.request.method eq \"POST\")"
-    description = "Limit price submissions to 10/minute"
-    enabled     = true
-  }
-
-  # Registration rate limit - 3 per hour per IP
-  rules {
-    action = "block"
-    ratelimit {
-      characteristics     = ["ip.src"]
-      period              = 3600
-      requests_per_period = 3
-      mitigation_timeout  = 3600
-    }
-    expression  = "(http.request.uri.path matches \"^/api/v1/auth/register$\" and http.request.method eq \"POST\")"
-    description = "Limit registrations to 3/hour"
-    enabled     = true
-  }
-
-  # General API rate limit - 100 per minute per IP
-  rules {
-    action = "block"
-    ratelimit {
-      characteristics     = ["ip.src"]
-      period              = 60
-      requests_per_period = 100
-      mitigation_timeout  = 60
-    }
-    expression  = "(http.request.uri.path matches \"^/api/\")"
-    description = "General API rate limit"
+    expression  = "(starts_with(http.request.uri.path, \"/api/\"))"
+    description = "API rate limit 10/10s"
     enabled     = true
   }
 }
@@ -164,7 +116,7 @@ resource "cloudflare_zone_settings_override" "open2log_settings" {
   }
 }
 
-# Cache rules for static content
+# Cache rules for static content (using ends_with - free plan compatible)
 resource "cloudflare_ruleset" "cache_rules" {
   zone_id = data.cloudflare_zone.open2log.id
   name    = "Cache Rules"
@@ -185,7 +137,7 @@ resource "cloudflare_ruleset" "cache_rules" {
         default = 86400 # 1 day
       }
     }
-    expression  = "(http.request.uri.path matches \"\\.(jpg|jpeg|png|avif|webp|svg)$\")"
+    expression  = "(http.request.uri.path.extension in {\"jpg\" \"jpeg\" \"png\" \"avif\" \"webp\" \"svg\" \"gif\"})"
     description = "Cache images for 1 week at edge, 1 day in browser"
     enabled     = true
   }
@@ -200,7 +152,7 @@ resource "cloudflare_ruleset" "cache_rules" {
         default = 2592000 # 30 days
       }
     }
-    expression  = "(http.request.uri.path matches \"\\.(css|js|woff2?)$\")"
+    expression  = "(http.request.uri.path.extension in {\"css\" \"js\" \"woff\" \"woff2\"})"
     description = "Cache static assets for 1 month"
     enabled     = true
   }

@@ -1,21 +1,17 @@
-# Hardware configuration for Hetzner auction server
-# This file will be generated during deployment with nixos-generate-config
-# Placeholder for now - actual values depend on specific server hardware
+# Hardware configuration for Hetzner auction server (bare metal)
+# srvos.nixosModules.hardware-hetzner-online-amd provides most hardware settings
 {
   config,
   lib,
-  pkgs,
   modulesPath,
   ...
 }:
-
 {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
-    (modulesPath + "/profiles/qemu-guest.nix")
   ];
 
-  # Boot
+  # Additional kernel modules for NVMe and storage
   boot.initrd.availableKernelModules = [
     "xhci_pci"
     "ahci"
@@ -23,19 +19,17 @@
     "usb_storage"
     "sd_mod"
   ];
-  boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [
-    "kvm-intel"
-    "kvm-amd"
-  ];
-  boot.extraModulePackages = [ ];
 
-  # Enable hardware crypto acceleration if available
-  hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+  # ZFS support
+  boot.supportedFilesystems = [ "zfs" ];
+  boot.zfs.forceImportRoot = false;
+
+  # ZFS requires a unique hostId (8 hex chars)
+  # Generated with: head -c4 /dev/urandom | od -A none -t x4 | tr -d ' '
+  networking.hostId = "a8c9e1f2";
+
+  # Enable firmware updates
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-
-  # Hetzner servers usually have good network cards
-  networking.useDHCP = lib.mkDefault true;
 
   # Platform
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";

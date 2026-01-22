@@ -11,14 +11,15 @@ secret_file="$SCRIPT_DIR/../../secrets/hosts/$NIXOS_SYSTEM_NAME.yaml"
 if [ -f "$secret_file" ]; then
   mkdir -p "./etc/ssh"
 
-  for keyname in ssh_host_ed25519_key ssh_host_ed25519_key.pub; do
-    if [[ $keyname == *.pub ]]; then
-      umask 0133
-    else
-      umask 0177
-    fi
-    sops --extract '["'"$keyname"'"]' -d "$secret_file" >"./etc/ssh/$keyname"
-  done
+  # Decrypt once and extract both keys (reduces age key prompts)
+  decrypted=$(sops -d "$secret_file")
+
+  umask 0177
+  echo "$decrypted" | yq -r '.ssh_host_ed25519_key' > "./etc/ssh/ssh_host_ed25519_key"
+
+  umask 0133
+  echo "$decrypted" | yq -r '.ssh_host_ed25519_key_pub // .["ssh_host_ed25519_key.pub"]' > "./etc/ssh/ssh_host_ed25519_key.pub"
+
   echo "Extracted SSH host keys"
 else
   echo "Warning: No SSH host key file at $secret_file, will generate new keys"
@@ -26,7 +27,9 @@ fi
 
 # Storage box credentials
 if [ -n "${STORAGEBOX_SERVER:-}" ]; then
+  umask 0022  # Reset umask for directory creation
   mkdir -p "./var/lib/secrets"
+  umask 0177  # Restrictive for the secret file
 
   cat >./var/lib/secrets/storagebox.env <<EOF
 STORAGEBOX_SERVER=${STORAGEBOX_SERVER}

@@ -22,25 +22,42 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1768886240,
-        "narHash": "sha256-C2TjvwYZ2VDxYWeqvvJ5XPPp6U7H66zeJlRaErJKoEM=",
+        "lastModified": 1769018530,
+        "narHash": "sha256-MJ27Cy2NtBEV5tsK+YraYr2g851f3Fl1LpNHDzDX15c=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "80e4adbcf8992d3fd27ad4964fbb84907f9478b0",
+        "rev": "88d3861acdd3d2f0e361767018218e51810df8a1",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
-        "ref": "nixos-unstable",
+        "ref": "nixos-unstable-small",
         "repo": "nixpkgs",
         "type": "github"
+      }
+    },
+    "onnimonni-ssh-keys": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-tbSMke+fWNNJsVT90NI1BKx0S/QJVl3bISOXAWxEqmI=",
+        "type": "file",
+        "url": "https://github.com/onnimonni.keys"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://github.com/onnimonni.keys"
       }
     },
     "root": {
       "inputs": {
         "disko": "disko",
-        "nixpkgs": "nixpkgs",
-        "sops-nix": "sops-nix"
+        "nixpkgs": [
+          "srvos",
+          "nixpkgs"
+        ],
+        "onnimonni-ssh-keys": "onnimonni-ssh-keys",
+        "sops-nix": "sops-nix",
+        "srvos": "srvos"
       }
     },
     "sops-nix": {
@@ -60,6 +77,24 @@
       "original": {
         "owner": "Mic92",
         "repo": "sops-nix",
+        "type": "github"
+      }
+    },
+    "srvos": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      },
+      "locked": {
+        "lastModified": 1769046412,
+        "narHash": "sha256-LbjKkSB4Nar9pX+AxHs2FGH2ZAFpKWUvr79uyEhFVqc=",
+        "owner": "nix-community",
+        "repo": "srvos",
+        "rev": "a78abbc16a5352ee848e454c99166c97415fbf39",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "srvos",
         "type": "github"
       }
     }

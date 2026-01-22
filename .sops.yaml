@@ -9,6 +9,13 @@ creation_rules:
       - *user_onnimonni
       - *user_onnimonni_backup
 
+  # Host-specific secrets (SSH keys, etc)
+  - path_regex: secrets/hosts/[^/]+\.(yaml|yml|json|env|ini)$
+    key_groups:
+    - age:
+      - *user_onnimonni
+      - *user_onnimonni_backup
+
   # These are the secrets which the machines have access to
   - path_regex: secrets/shared/[^/]+\.(yaml|yml|json|env|ini)$
     key_groups:

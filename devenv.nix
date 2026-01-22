@@ -32,6 +32,7 @@ rec {
     sops
     age
     age-plugin-se
+    yq-go # For parsing YAML in scripts
 
     # Architecture Decision Records
     adr-tools

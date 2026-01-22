@@ -45,3 +45,4 @@ nix flake check ./server/configuration
 * Use monorepo inside this git repository. create DuckDB extensions and OpenTofu plugins outside of this repository.
 * If certain credential for Cloudflare or Hetzner is not available you can ask for them from the user.
 * Whenever user says 'terraform' they actually mean 'opentofu'
+* **IMPORTANT:** Whenever you need to create new private keys or new secrets tell user how they can create them so you don't have to see them.
