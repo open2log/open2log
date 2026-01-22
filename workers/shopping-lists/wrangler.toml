@@ -1,0 +1,18 @@
+name = "open2log-shopping-lists"
+main = "build/worker/shim.mjs"
+compatibility_date = "2024-01-01"
+
+[build]
+command = "cargo install -q worker-build && worker-build --release"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "open2log-shopping-lists"
+database_id = "" # Will be filled after terraform creates the database
+
+[[routes]]
+pattern = "api.open2log.com/lists/*"
+zone_name = "open2log.com"
+
+[observability]
+enabled = true

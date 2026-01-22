@@ -42,12 +42,22 @@ rec {
     # Deployment
     nixos-rebuild
     nixos-anywhere
+
+    # Data processing
+    duckdb
+
+    # Cloudflare Workers
+    #wrangler
+
+    # SQLite replication
+    litestream
   ];
 
   # https://devenv.sh/languages/
   languages.elixir.enable = true;
   languages.elixir.package = pkgs-unstable.elixir_1_19;
   languages.opentofu.enable = true;
+  languages.rust.enable = true;
 
   # Shorthands for tofu:
   # $ infra init -upgrade
@@ -60,6 +70,109 @@ rec {
   # useful in scripting
   scripts.get_secret_env.exec = ''
     sops exec-env ${config.git.root}/secrets/infra.yaml "printenv $1"
+  '';
+
+  # Phoenix app shortcuts
+  # $ web setup   - Install dependencies
+  # $ web server  - Start development server
+  # $ web test    - Run tests
+  # $ web migrate - Run migrations
+  scripts.web.exec = ''
+    cd ${config.git.root}/apps/web/open2log
+    case "$1" in
+      setup)
+        mix deps.get && mix setup
+        ;;
+      server|s)
+        mix phx.server
+        ;;
+      test|t)
+        mix test
+        ;;
+      migrate|m)
+        mix ecto.migrate
+        ;;
+      iex)
+        iex -S mix phx.server
+        ;;
+      *)
+        mix "$@"
+        ;;
+    esac
+  '';
+
+  # DuckDB crawling pipelines
+  # $ crawl s-kaupat  - Crawl S-kaupat.fi
+  # $ crawl lidl      - Crawl Lidl.fi
+  # $ crawl tokmanni  - Crawl Tokmanni.fi
+  # $ crawl all       - Run all crawlers
+  # $ crawl consolidate - Consolidate all data
+  scripts.crawl.exec = ''
+    PIPELINES_DIR="${config.git.root}/data/pipelines"
+    OUTPUT_DIR="${config.git.root}/data/output"
+    mkdir -p "$OUTPUT_DIR"
+    cd "$OUTPUT_DIR"
+    case "$1" in
+      s-kaupat|skaupat)
+        duckdb -f "$PIPELINES_DIR/crawl_s_kaupat.sql"
+        ;;
+      lidl)
+        duckdb -f "$PIPELINES_DIR/crawl_lidl_fi.sql"
+        ;;
+      tokmanni)
+        duckdb -f "$PIPELINES_DIR/crawl_tokmanni.sql"
+        ;;
+      all)
+        duckdb -f "$PIPELINES_DIR/crawl_s_kaupat.sql"
+        duckdb -f "$PIPELINES_DIR/crawl_lidl_fi.sql"
+        duckdb -f "$PIPELINES_DIR/crawl_tokmanni.sql"
+        duckdb -f "$PIPELINES_DIR/consolidate.sql"
+        ;;
+      consolidate)
+        duckdb -f "$PIPELINES_DIR/consolidate.sql"
+        ;;
+      *)
+        echo "Usage: crawl <s-kaupat|lidl|tokmanni|all|consolidate>"
+        ;;
+    esac
+  '';
+
+  # Deploy server with nixos-anywhere
+  # $ deploy <ip> - Deploy NixOS to server
+  scripts.deploy.exec = ''
+    if [ -z "$1" ]; then
+      echo "Usage: deploy <server-ip>"
+      exit 1
+    fi
+    nixos-anywhere --flake ${config.git.root}/server/configuration#memento-mori root@$1
+  '';
+
+  # Worker deployment
+  # $ worker deploy <name>  - Deploy a Cloudflare Worker
+  # $ worker dev <name>     - Run worker locally
+  scripts.worker.exec = ''
+    if [ -z "$1" ] || [ -z "$2" ]; then
+      echo "Usage: worker <deploy|dev> <worker-name>"
+      echo "Available workers: image-upload, shopping-lists"
+      exit 1
+    fi
+    WORKER_DIR="${config.git.root}/workers/$2"
+    if [ ! -d "$WORKER_DIR" ]; then
+      echo "Worker '$2' not found"
+      exit 1
+    fi
+    cd "$WORKER_DIR"
+    case "$1" in
+      deploy)
+        wrangler deploy
+        ;;
+      dev)
+        wrangler dev
+        ;;
+      *)
+        echo "Unknown command: $1"
+        ;;
+    esac
   '';
 
   # https://devenv.sh/git-hooks/

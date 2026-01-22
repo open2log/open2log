@@ -14,3 +14,39 @@ infra/.terraform
 
 # Terraform / OpenTofu state files (contain secrets!)
 infra/*.tfstate*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+*.swp
+*.swo
+
+# Build outputs
+/output/
+**/target/
+**/build/
+
+# Temporary files
+*.log
+*.tmp
+
+# DuckDB
+*.duckdb
+*.duckdb.wal
+
+# Parquet outputs (generated)
+/data/output/
+
+# iOS
+apps/ios/DerivedData/
+apps/ios/Pods/
+**/*.xcuserstate
+
+# Rust/Workers
+workers/**/target/
+
+# Coverage
+/coverage/

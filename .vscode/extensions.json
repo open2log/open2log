@@ -1,6 +1,8 @@
 {
   "recommendations": [
     "editorconfig.editorconfig",
-    "lexical-lsp.lexical"
+    "lexical-lsp.lexical",
+    "opentofu.vscode-opentofu",
+    "jnoortheen.nix-ide"
   ]
 }
